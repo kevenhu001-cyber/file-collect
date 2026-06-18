@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const CONFIG_DIR = path.join(__dirname, 'config');
 const SETTINGS_PATH = path.join(CONFIG_DIR, 'settings.json');
-const ADMIN_PASSWORD = '750205';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '750205';
 
 // --- Persisted settings ---
 function loadSettings() {

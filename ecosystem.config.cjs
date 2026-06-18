@@ -7,6 +7,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
+        ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '750205',
       },
       instances: 1,
       exec_mode: 'fork',

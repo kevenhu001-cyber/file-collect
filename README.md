@@ -189,20 +189,25 @@ curl https://yourdomain.com/api/collection/status
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `PORT` | `3000` | 应用监听端口 |
+| `ADMIN_PASSWORD` | `750205` | 管理员登录密码 |
 
 ## 管理员密码
 
-密码硬编码在 `server.js` 第 13 行：
-
-```js
-const ADMIN_PASSWORD = '750205';
-```
-
-如需修改密码，编辑该行后重启应用：
+默认密码为 `750205`。**部署前务必修改**，通过环境变量设置：
 
 ```bash
-pm2 restart file-collect
+# 直接运行
+ADMIN_PASSWORD=your_new_password npm start
+
+# 或写入 .env 文件（已加入 .gitignore，不会被提交）
+echo "ADMIN_PASSWORD=your_new_password" > .env
+npm start
+
+# 或在使用 PM2 时传入
+ADMIN_PASSWORD=your_new_password pm2 start server.js --name file-collect
 ```
+
+也可以通过 PM2 的 `ecosystem.config.cjs` 配置环境变量。
 
 ## 文件结构
 
