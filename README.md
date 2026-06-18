@@ -167,7 +167,7 @@ curl https://yourdomain.com/api/collection/status
 
 ### 管理后台
 
-访问 `https://yourdomain.com/admin`，默认密码为 `750205`（可在 `server.js` 中修改 `ADMIN_PASSWORD`）。
+访问 `https://yourdomain.com/admin`，默认密码为 `000000`（可通过环境变量 `ADMIN_PASSWORD` 修改）。
 
 后台功能：
 
