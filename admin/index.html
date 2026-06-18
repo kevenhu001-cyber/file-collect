@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 · 文件收集</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body {
+      background: #f5f5f5;
+      align-items: flex-start;
+      padding-top: 60px;
+    }
+
+    .container {
+      max-width: 680px;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .admin-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .admin-header h1 span {
+      color: #bbb;
+      font-weight: 400;
+    }
+
+    .collection-bar {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .custom-select-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      user-select: none;
+      min-width: 140px;
+    }
+
+    .custom-select-trigger:hover {
+      border-color: #aaa;
+    }
+
+    .custom-select-trigger .arrow {
+      margin-left: auto;
+      font-size: 10px;
+      color: #bbb;
+      transition: transform 0.2s;
+    }
+
+    .custom-select-trigger.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .custom-select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      min-width: 200px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      z-index: 100;
+      display: none;
+      overflow: hidden;
+    }
+
+    .custom-select-dropdown.visible {
+      display: block;
+    }
+
+    .custom-select-dropdown .option {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .custom-select-dropdown .option:hover {
+      background: #f5f5f5;
+    }
+
+    .custom-select-dropdown .option.active {
+      color: #111;
+      font-weight: 500;
+      background: #fafafa;
+    }
+
+    .custom-select-dropdown .option + .option {
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .copy-url-btn {
+      background: none;
+      border: none;
+      padding: 4px 0 4px 12px;
+      font-size: 12px;
+      color: #888;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: color 0.15s;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .copy-url-btn::before {
+      content: '[ ';
+    }
+
+    .copy-url-btn::after {
+      content: ' ]';
+    }
+
+    .copy-url-btn:hover {
+      color: #111;
+    }
+
+    .copy-url-btn.copied {
+      color: #2e7d32;
+    }
+
+    /* --- Collection management --- */
+    .coll-mgmt {
+      margin-bottom: 20px;
+    }
+
+    .coll-mgmt-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #fff;
+    }
+
+    .coll-mgmt-toggle:hover {
+      border-color: #111;
+      color: #111;
+    }
+
+    .coll-mgmt-panel {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .coll-mgmt-panel.visible {
+      display: block;
+    }
+
+    .coll-mgmt-panel .create-form {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .create-form .field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .create-form .field-row + .field-row {
+      margin-top: 10px;
+    }
+
+    .create-form .field-row label {
+      font-size: 12px;
+      color: #888;
+      min-width: 44px;
+    }
+
+    .create-form .field-row input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .create-form .field-row input:focus {
+      border-color: #111;
+    }
+
+    .create-form .field-row .slug-input {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      min-width: 140px;
+      max-width: 180px;
+    }
+
+    .create-form .actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .create-status {
+      font-size: 12px;
+    }
+
+    .create-status.success { color: #2e7d32; }
+    .create-status.error { color: #c62828; }
+
+    .coll-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .coll-list .coll-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      gap: 12px;
+    }
+
+    .coll-item .coll-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .coll-item .coll-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #111;
+    }
+
+    .coll-item .coll-url {
+      font-size: 11px;
+      color: #bbb;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+
+    .coll-item .coll-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .coll-item .coll-actions button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #666;
+      transition: all 0.15s;
+    }
+
+    .coll-item .coll-actions button:hover {
+      border-color: #111;
+      color: #111;
+    }
+
+    .coll-item .coll-actions .del-coll {
+      color: #c62828;
+      border-color: #f5c6cb;
+    }
+
+    .coll-item .coll-actions .del-coll:hover {
+      background: #fef2f2;
+    }
+
+    .collection-bar .coll-label {
+      font-size: 13px;
+      color: #888;
+      margin-right: 8px;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* --- Settings panel --- */
+    .settings-panel {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .settings-panel.visible {
+      display: block;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .settings-row + .settings-row {
+      margin-top: 12px;
+    }
+
+    .settings-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      min-width: 80px;
+    }
+
+    .toggle-btn {
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: #fff;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn.active {
+      background: #2e7d32;
+      color: #fff;
+      border-color: #2e7d32;
+    }
+
+    .toggle-btn.inactive {
+      background: #fff;
+      color: #c62828;
+      border-color: #f5c6cb;
+    }
+
+    .toggle-btn.inactive:hover {
+      background: #fef2f2;
+    }
+
+    .settings-panel input[type="datetime-local"] {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .settings-panel input[type="datetime-local"]:focus {
+      border-color: #111;
+    }
+
+    .settings-panel input[type="number"] {
+      width: 70px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      text-align: center;
+    }
+
+    .settings-panel input[type="number"]:focus {
+      border-color: #111;
+    }
+
+    .save-settings-btn {
+      padding: 8px 20px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .save-settings-btn:hover {
+      opacity: 0.85;
+    }
+
+    .settings-status {
+      font-size: 12px;
+      color: #888;
+      margin-left: 8px;
+    }
+
+    .settings-status.success { color: #2e7d32; }
+    .settings-status.error { color: #c62828; }
+
+    .action-btn {
+      padding: 10px 18px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      color: #333;
+    }
+
+    .action-btn:hover {
+      border-color: #111;
+      color: #111;
+    }
+
+    .btn-primary {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .btn-primary:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 28px;
+      padding: 16px 20px;
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .stats-bar strong {
+      color: #111;
+      font-weight: 600;
+    }
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .user-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      transition: border-color 0.15s;
+    }
+
+    .user-card:hover {
+      border-color: #ccc;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #111;
+    }
+
+    .user-meta {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .user-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .file-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #666;
+      background: #f5f5f5;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    .file-tag .del-file {
+      cursor: pointer;
+      color: #ccc;
+      font-size: 14px;
+      line-height: 1;
+      margin-left: 2px;
+      transition: color 0.15s;
+    }
+
+    .file-tag .del-file:hover {
+      color: #c62828;
+    }
+
+    .user-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .user-actions-group .action-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+
+    .btn-danger {
+      color: #c62828;
+      border-color: #f5c6cb;
+    }
+
+    .btn-danger:hover {
+      background: #fef2f2;
+      border-color: #c62828;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #ccc;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-top: 12px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #bbb;
+      font-size: 14px;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #eee;
+      border-top-color: #111;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* --- Login page --- */
+    #loginPage .login-box {
+      text-align: center;
+      padding: 60px 36px;
+    }
+
+    #loginPage .login-box h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 4px;
+    }
+
+    #loginPage .login-box .sub {
+      font-size: 13px;
+      color: #bbb;
+      margin-bottom: 32px;
+    }
+
+    #loginPage .login-box input[type="password"] {
+      width: 100%;
+      max-width: 280px;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+      display: block;
+      margin: 0 auto 16px;
+    }
+
+    #loginPage .login-box input[type="password"]:focus {
+      border-color: #111;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+    }
+
+    #loginPage .login-box .login-btn {
+      width: 100%;
+      max-width: 280px;
+      padding: 12px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: block;
+      margin: 0 auto;
+    }
+
+    #loginPage .login-box .login-btn:hover {
+      opacity: 0.85;
+    }
+
+    #loginPage .login-box .login-error {
+      color: #c62828;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    #loginPage .login-box .login-error.hidden {
+      display: none;
+    }
+
+    /* --- Confirm dialog --- */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .confirm-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: 340px;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .confirm-box p {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .confirm-actions button {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #333;
+      transition: all 0.15s;
+    }
+
+    .confirm-actions .confirm-yes {
+      background: #c62828;
+      color: #fff;
+      border-color: #c62828;
+    }
+
+    .confirm-actions .confirm-yes:hover {
+      opacity: 0.85;
+    }
+
+    .confirm-actions .confirm-no:hover {
+      border-color: #111;
+    }
+
+    @media (max-width: 600px) {
+      .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .user-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .user-actions-group {
+        margin-left: 0;
+        width: 100%;
+      }
+      .stats-bar {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login page -->
+  <div id="loginPage" class="container">
+    <div class="login-box">
+      <h2>管理后台</h2>
+      <p class="sub">文件收集系统</p>
+      <input type="password" id="passwordInput" placeholder="管理员密码" autocomplete="current-password" />
+      <button class="login-btn" id="loginBtn">验证</button>
+      <p id="loginError" class="login-error hidden">密码错误，请重试</p>
+    </div>
+  </div>
+
+  <!-- Confirm dialog (hidden by default) -->
+  <div id="confirmOverlay" class="confirm-overlay hidden">
+    <div class="confirm-box">
+      <p id="confirmMessage">确定要删除吗？</p>
+      <div class="confirm-actions">
+        <button class="confirm-no" id="confirmNo">取消</button>
+        <button class="confirm-yes" id="confirmYes">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div id="mainContent" class="container hidden">
+    <div class="admin-header">
+      <h1>管理后台 <span>· 文件收集</span></h1>
+      <div class="admin-actions">
+        <button id="downloadAllBtn" class="action-btn btn-primary" onclick="downloadAll()">打包全部</button>
+        <button class="action-btn" onclick="toggleSettings()">设置</button>
+        <button class="action-btn" onclick="loadUsers()">刷新</button>
+      </div>
+    </div>
+
+    <div class="collection-bar">
+      <span class="coll-label">当前收集:</span>
+      <div style="position:relative;">
+        <div id="customSelectTrigger" class="custom-select-trigger" onclick="toggleDropdown()">
+          <span id="selectLabel">实验作业</span>
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div id="customSelectDropdown" class="custom-select-dropdown">
+          <div class="option active" data-value="experiment" onclick="selectOption('experiment')">储能未来 2501 - 数学实验作业</div>
+          <div class="option" data-value="modeling" onclick="selectOption('modeling')">储能未来 2501 - 数学建模大作业</div>
+        </div>
+      </div>
+      <button class="copy-url-btn" onclick="copyCollectionUrl()">复制链接</button>
+    </div>
+
+    <!-- Collection management -->
+    <div class="coll-mgmt">
+      <button class="coll-mgmt-toggle" onclick="toggleCollMgmt()">管理收集</button>
+      <div id="collMgmtPanel" class="coll-mgmt-panel">
+        <!-- Create form -->
+        <div class="create-form">
+          <div class="field-row">
+            <label>标识</label>
+            <input class="slug-input" id="newCollSlug" placeholder="english-slug" />
+          </div>
+          <div class="field-row">
+            <label>标题</label>
+            <input id="newCollTitle" placeholder="如: 储能未来 2501" />
+          </div>
+          <div class="field-row">
+            <label>副标题</label>
+            <input id="newCollSubtitle" placeholder="如: 数学实验作业收集" />
+          </div>
+          <div class="actions">
+            <button class="save-settings-btn" onclick="createCollection()">创建收集</button>
+            <span id="createStatus" class="create-status"></span>
+          </div>
+        </div>
+        <!-- Collection list -->
+        <div id="collList" class="coll-list"></div>
+      </div>
+    </div>
+
+    <!-- Settings panel -->
+    <div id="settingsPanel" class="settings-panel">
+      <div class="settings-row">
+        <span class="settings-label">收集状态</span>
+        <button id="pauseBtn" class="toggle-btn" onclick="togglePause()">加载中...</button>
+        <span id="pauseHint" style="font-size:12px;color:#888;"></span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">截止日期</span>
+        <input type="datetime-local" id="deadlineInput" />
+        <span style="font-size:12px;color:#bbb;">留空表示不设截止</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">IP 限制</span>
+        <span style="font-size:13px;color:#555;">每 IP 每小时最多</span>
+        <input type="number" id="rateLimitInput" min="1" max="100" />
+        <span style="font-size:13px;color:#555;">次上传</span>
+        <label style="font-size:13px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" id="rateLimitEnabled" /> 启用
+        </label>
+      </div>
+      <div class="settings-row">
+        <button class="save-settings-btn" onclick="saveSettings()">保存设置</button>
+        <span id="settingsStatus" class="settings-status"></span>
+      </div>
+    </div>
+
+    <div id="stats" class="stats-bar hidden">
+      <span><strong id="totalUsers">0</strong> 人</span>
+      <span><strong id="totalFiles">0</strong> 个文件</span>
+      <span><strong id="totalSize">0 B</strong> 合计</span>
+    </div>
+
+    <div id="userList" class="user-list">
+      <div class="loading">加载中</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Auth ---
+    const TOKEN_KEY = 'file_collect_admin_token';
+    let token = localStorage.getItem(TOKEN_KEY);
+
+    function isLoggedIn() { return !!token; }
+
+    function authHeaders() {
+      return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+    }
+
+    function redirectToLogin() {
+      token = null;
+      localStorage.removeItem(TOKEN_KEY);
+      document.getElementById('loginPage').classList.remove('hidden');
+      document.getElementById('mainContent').classList.add('hidden');
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').focus();
+    }
+
+    // Login form
+    document.getElementById('loginBtn').addEventListener('click', doLogin);
+    document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    async function doLogin() {
+      const pw = document.getElementById('passwordInput').value;
+      const errEl = document.getElementById('loginError');
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          token = data.token;
+          localStorage.setItem(TOKEN_KEY, token);
+          document.getElementById('loginPage').classList.add('hidden');
+          document.getElementById('mainContent').classList.remove('hidden');
+          errEl.classList.add('hidden');
+          initApp();
+        } else {
+          errEl.classList.remove('hidden');
+        }
+      } catch {
+        errEl.textContent = '网络错误，请重试';
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    // Check existing session
+    async function checkSession() {
+      if (!token) return false;
+      try {
+        const res = await fetch('/api/admin/check', { headers: authHeaders() });
+        if (res.ok) return true;
+      } catch {}
+      return false;
+    }
+
+    // --- Confirm dialog ---
+    let confirmCallback = null;
+
+    function showConfirm(msg, cb) {
+      document.getElementById('confirmMessage').textContent = msg;
+      document.getElementById('confirmOverlay').classList.remove('hidden');
+      confirmCallback = cb;
+    }
+
+    document.getElementById('confirmYes').addEventListener('click', function() {
+      document.getElementById('confirmOverlay').classList.add('hidden');
+      if (confirmCallback) confirmCallback();
+      confirmCallback = null;
+    });
+
+    document.getElementById('confirmNo').addEventListener('click', function() {
+      document.getElementById('confirmOverlay').classList.add('hidden');
+      confirmCallback = null;
+    });
+
+    // --- Main app ---
+    let currentCollection = 'experiment';
+
+    function initApp() {
+      // Restore last selected collection
+      var saved = localStorage.getItem('file_collect_collection');
+      if (saved) {
+        currentCollection = saved;
+      }
+      // Close dropdown on outside click
+      document.addEventListener('click', function(e) {
+        var trigger = document.getElementById('customSelectTrigger');
+        var dropdown = document.getElementById('customSelectDropdown');
+        if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.remove('visible');
+          trigger.classList.remove('open');
+        }
+      });
+      // Patch fetch to include auth headers
+      const origFetch = window.fetch;
+      window.fetch = function(url, opts) {
+        opts = opts || {};
+        if (typeof url === 'string' && (url.startsWith('/api/') || url.startsWith('/admin/'))) {
+          opts.headers = opts.headers || {};
+          opts.headers['Authorization'] = 'Bearer ' + token;
+        }
+        return origFetch.call(window, url, opts).then(function(res) {
+          if (res.status === 401) {
+            redirectToLogin();
+          }
+          return res;
+        });
+      };
+      loadCollections();
+    }
+
+    function switchCollection(slug) {
+      currentCollection = slug;
+      localStorage.setItem('file_collect_collection', slug);
+      updateDropdownLabel(slug);
+      loadSettings();
+      loadUsers();
+    }
+
+    function toggleDropdown() {
+      var dd = document.getElementById('customSelectDropdown');
+      var trig = document.getElementById('customSelectTrigger');
+      dd.classList.toggle('visible');
+      trig.classList.toggle('open');
+    }
+
+    function selectOption(slug) {
+      var dd = document.getElementById('customSelectDropdown');
+      var trig = document.getElementById('customSelectTrigger');
+      // Update active class in dropdown
+      dd.querySelectorAll('.option').forEach(function(el) {
+        el.classList.toggle('active', el.dataset.value === slug);
+      });
+      dd.classList.remove('visible');
+      trig.classList.remove('open');
+      switchCollection(slug);
+    }
+
+    function updateDropdownLabel(slug) {
+      var label = document.getElementById('selectLabel');
+      var dd = document.getElementById('customSelectDropdown');
+      var opt = dd.querySelector('.option[data-value="' + slug + '"]');
+      if (opt) {
+        label.textContent = opt.getAttribute('data-short') || slug;
+      } else {
+        label.textContent = slug;
+      }
+      dd.querySelectorAll('.option').forEach(function(el) {
+        el.classList.toggle('active', el.dataset.value === slug);
+      });
+    }
+
+    // --- Collection management ---
+    function toggleCollMgmt() {
+      var panel = document.getElementById('collMgmtPanel');
+      panel.classList.toggle('visible');
+      if (panel.classList.contains('visible')) {
+        document.getElementById('newCollSlug').value = '';
+        document.getElementById('newCollTitle').value = '';
+        document.getElementById('newCollSubtitle').value = '';
+        document.getElementById('createStatus').textContent = '';
+        loadCollectionList();
+      }
+    }
+
+    async function loadCollections() {
+      try {
+        var res = await fetch('/api/admin/collections');
+        var data = await res.json();
+        populateDropdown(data.collections);
+        renderCollectionList(data.collections);
+        var saved = localStorage.getItem('file_collect_collection');
+        var target = saved || (data.collections[0] && data.collections[0].slug) || 'experiment';
+        var exists = data.collections.some(function(c) { return c.slug === target; });
+        if (!exists) target = data.collections[0] ? data.collections[0].slug : 'experiment';
+        currentCollection = target;
+        updateDropdownLabel(target);
+        loadUsers();
+      } catch {
+        populateDropdown([{slug:'experiment',title:'实验作业',subtitle:''}]);
+        loadUsers();
+      }
+    }
+
+    function populateDropdown(collections) {
+      var dd = document.getElementById('customSelectDropdown');
+      dd.innerHTML = collections.map(function(c) {
+        var short = c.title || c.slug;
+        var display = c.subtitle ? (short + ' - ' + c.subtitle) : short;
+        return '<div class="option" data-value="' + c.slug + '" data-short="' + esc(short) + '" onclick="selectOption(\'' + c.slug + '\')">' + esc(display) + '</div>';
+      }).join('');
+      updateDropdownLabel(currentCollection);
+    }
+
+    function renderCollectionList(collections) {
+      var el = document.getElementById('collList');
+      if (!collections || collections.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:#ccc;font-size:13px;">还没有收集</div>';
+        return;
+      }
+      el.innerHTML = collections.map(function(c) {
+        var url = BASE_URL + '/collect/' + c.slug + '/';
+        return '<div class="coll-item">' +
+          '<div class="coll-info">' +
+            '<span class="coll-name">' + esc(c.title || c.slug) + '</span>' +
+            '<span class="coll-url">' + esc(url) + '</span>' +
+          '</div>' +
+          '<div class="coll-actions">' +
+            '<button onclick="copySpecificUrl(\'' + c.slug + '\')">复制链接</button>' +
+            '<button class="del-coll" onclick="deleteCollection(\'' + c.slug + '\')">删除</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    async function loadCollectionList() {
+      try {
+        var res = await fetch('/api/admin/collections');
+        var data = await res.json();
+        renderCollectionList(data.collections);
+      } catch {}
+    }
+
+    async function createCollection() {
+      var slug = document.getElementById('newCollSlug').value.trim();
+      var title = document.getElementById('newCollTitle').value.trim();
+      var subtitle = document.getElementById('newCollSubtitle').value.trim();
+      var status = document.getElementById('createStatus');
+
+      if (!slug || !title) {
+        status.textContent = '标识和标题不能为空';
+        status.className = 'create-status error';
+        return;
+      }
+
+      try {
+        var res = await fetch('/api/admin/collections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: slug, title: title, subtitle: subtitle }),
+        });
+        var data = await res.json();
+        if (data.success) {
+          status.textContent = '创建成功';
+          status.className = 'create-status success';
+          document.getElementById('newCollSlug').value = '';
+          document.getElementById('newCollTitle').value = '';
+          document.getElementById('newCollSubtitle').value = '';
+          loadCollections();
+        } else {
+          status.textContent = data.error || '创建失败';
+          status.className = 'create-status error';
+        }
+      } catch {
+        status.textContent = '网络错误';
+        status.className = 'create-status error';
+      }
+    }
+
+    function deleteCollection(slug) {
+      showConfirm('确定要删除 "' + slug + '" 吗？如果该收集下有文件，将无法删除。', async function() {
+        try {
+          var res = await fetch('/api/admin/collections/' + slug, { method: 'DELETE' });
+          var data = await res.json();
+          if (data.success) {
+            if (currentCollection === slug) {
+              var target = null;
+              var dd = document.getElementById('customSelectDropdown');
+              var firstOpt = dd.querySelector('.option');
+              if (firstOpt) target = firstOpt.dataset.value;
+              if (target) selectOption(target);
+            }
+            loadCollections();
+          } else {
+            alert(data.error || '删除失败');
+          }
+        } catch {
+          alert('网络错误');
+        }
+      });
+    }
+
+    var BASE_URL = 'https://filecollect.addtech.site';
+
+    function copyCollectionUrl() {
+      copySpecificUrl(currentCollection);
+    }
+
+    function copySpecificUrl(slug) {
+      var url = BASE_URL + '/collect/' + slug + '/';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+          showCopied();
+        }).catch(function() {
+          fallbackCopy(url);
+        });
+      } else {
+        fallbackCopy(url);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showCopied();
+      } catch {}
+      document.body.removeChild(ta);
+    }
+
+    function showCopied() {
+      var btn = event && event.target;
+      if (!btn || btn.nodeName !== 'BUTTON') btn = document.querySelector('.copy-url-btn');
+      var orig = btn.textContent;
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    // --- Settings ---
+    function toggleSettings() {
+      var panel = document.getElementById('settingsPanel');
+      panel.classList.toggle('visible');
+      if (panel.classList.contains('visible')) {
+        loadSettings();
+      }
+    }
+
+    async function loadSettings() {
+      try {
+        var res = await fetch('/api/admin/settings');
+        var data = await res.json();
+        var coll = data.collections[currentCollection] || {};
+
+        // Pause button
+        var btn = document.getElementById('pauseBtn');
+        if (coll.paused) {
+          btn.textContent = '已暂停';
+          btn.className = 'toggle-btn inactive';
+          document.getElementById('pauseHint').textContent = '点击恢复收集';
+        } else {
+          btn.textContent = '收集中';
+          btn.className = 'toggle-btn active';
+          document.getElementById('pauseHint').textContent = '点击暂停收集';
+        }
+
+        // Deadline
+        var dlInput = document.getElementById('deadlineInput');
+        if (coll.deadline) {
+          // Format ISO string to datetime-local format
+          var d = new Date(coll.deadline);
+          var pad = function(n) { return String(n).padStart(2, '0'); };
+          dlInput.value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        } else {
+          dlInput.value = '';
+        }
+
+        // Rate limit
+        document.getElementById('rateLimitInput').value = data.rateLimit.maxPerHour;
+        document.getElementById('rateLimitEnabled').checked = data.rateLimit.enabled;
+      } catch {}
+    }
+
+    async function togglePause() {
+      var btn = document.getElementById('pauseBtn');
+      var isPaused = btn.className === 'toggle-btn inactive';
+      try {
+        await fetch('/api/admin/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ collection: currentCollection, paused: !isPaused }),
+        });
+        loadSettings();
+      } catch {}
+    }
+
+    async function saveSettings() {
+      var statusEl = document.getElementById('settingsStatus');
+      var deadline = document.getElementById('deadlineInput').value;
+      var deadlineISO = deadline ? new Date(deadline).toISOString() : null;
+
+      try {
+        var res = await fetch('/api/admin/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            collection: currentCollection,
+            deadline: deadlineISO,
+            rateLimit: {
+              maxPerHour: parseInt(document.getElementById('rateLimitInput').value) || 10,
+              enabled: document.getElementById('rateLimitEnabled').checked,
+            },
+          }),
+        });
+        var data = await res.json();
+        if (data.success) {
+          statusEl.textContent = '已保存';
+          statusEl.className = 'settings-status success';
+          setTimeout(function() { statusEl.textContent = ''; }, 2000);
+          loadSettings();
+        } else {
+          statusEl.textContent = '保存失败';
+          statusEl.className = 'settings-status error';
+        }
+      } catch {
+        statusEl.textContent = '保存失败';
+        statusEl.className = 'settings-status error';
+      }
+    }
+
+    function fallbackCopy(text, btn) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showCopied(btn);
+      } catch {}
+      document.body.removeChild(ta);
+    }
+
+    function showCopied(btn) {
+      var orig = btn.textContent;
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    function collParam() {
+      return 'collection=' + encodeURIComponent(currentCollection);
+    }
+
+    async function loadUsers() {
+      const el = document.getElementById('userList');
+      const stats = document.getElementById('stats');
+      el.innerHTML = '<div class="loading">加载中</div>';
+
+      try {
+        const res = await fetch('/api/users?' + collParam());
+        const data = await res.json();
+
+        if (!data.users || data.users.length === 0) {
+          el.innerHTML = '<div class="empty-state"><p>还没有人上传文件</p></div>';
+          stats.classList.add('hidden');
+          return;
+        }
+
+        stats.classList.remove('hidden');
+        const tu = data.users.length;
+        const tf = data.users.reduce(function(s, u) { return s + u.fileCount; }, 0);
+        const ts = data.users.reduce(function(s, u) { return s + u.totalSize; }, 0);
+        document.getElementById('totalUsers').textContent = tu;
+        document.getElementById('totalFiles').textContent = tf;
+        document.getElementById('totalSize').textContent = formatSize(ts);
+
+        el.innerHTML = data.users.map(function(u) {
+          var fileTags = u.files.map(function(f) {
+            var encodedName = encodeURIComponent(f.name);
+            var encodedUser = encodeURIComponent(u.username);
+            return '<span class="file-tag">' + esc(f.originalName) +
+              ' <span class="del-file" onclick="deleteFile(\'' + esc(encodedUser) + '\', \'' + esc(encodedName) + '\')">x</span></span>';
+          }).join('');
+
+          return '<div class="user-card">' +
+            '<div class="user-info">' +
+              '<div class="user-name">' + esc(u.username) + '</div>' +
+              '<div class="user-meta">' + u.fileCount + ' 个文件 - ' + formatSize(u.totalSize) + '</div>' +
+              (fileTags ? '<div class="user-files">' + fileTags + '</div>' : '') +
+            '</div>' +
+            '<div class="user-actions-group">' +
+              '<button class="action-btn" onclick="downloadUser(\'' + esc(encodeURIComponent(u.username)) + '\')">下载</button>' +
+              '<button class="action-btn btn-danger" onclick="deleteUser(\'' + esc(u.username) + '\')">删除</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } catch (e) {
+        el.innerHTML = '<div class="empty-state" style="color:#991b1b;">加载失败，请刷新重试</div>';
+      }
+    }
+
+    async function deleteFile(username, encodedName) {
+      showConfirm('确定要删除这个文件吗？', async function() {
+        try {
+          var res = await fetch('/api/file/' + username + '/' + encodedName + '?' + collParam(), { method: 'DELETE' });
+          var data = await res.json();
+          if (data.success) {
+            loadUsers();
+          } else {
+            alert('删除失败: ' + (data.error || '未知错误'));
+          }
+        } catch {
+          alert('网络错误');
+        }
+      });
+    }
+
+    function deleteUser(username) {
+      showConfirm('确定要删除用户 "' + username + '" 及其所有文件吗？\n此操作不可撤销。', async function() {
+        try {
+          var res = await fetch('/api/user/' + encodeURIComponent(username) + '?' + collParam(), { method: 'DELETE' });
+          var data = await res.json();
+          if (data.success) {
+            loadUsers();
+          } else {
+            alert('删除失败: ' + (data.error || '未知错误'));
+          }
+        } catch {
+          alert('网络错误');
+        }
+      });
+    }
+
+    function formatSize(b) {
+      if (!b) return '0 B';
+      if (b < 1024) return b + ' B';
+      if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+      if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+      return (b / 1073741824).toFixed(1) + ' GB';
+    }
+
+    function downloadWithAuth(url) {
+      var a = document.createElement('a');
+      a.href = url + '&token=' + encodeURIComponent(token);
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function downloadAll() {
+      downloadWithAuth('/api/download-all?' + collParam());
+    }
+
+    function downloadUser(encodedUsername) {
+      downloadWithAuth('/api/download-user/' + encodedUsername + '?' + collParam());
+    }
+
+    function esc(s) {
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    // --- Bootstrap ---
+    (async function() {
+      var loggedIn = await checkSession();
+      if (loggedIn) {
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        initApp();
+      } else {
+        document.getElementById('passwordInput').focus();
+      }
+    })();
+  </script>
+</body>
+</html>

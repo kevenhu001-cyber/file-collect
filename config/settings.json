@@ -1,0 +1,14 @@
+{
+  "collections": {
+    "modeling": {
+      "title": "储能未来2501",
+      "subtitle": "数学建模收集",
+      "paused": true,
+      "deadline": null
+    }
+  },
+  "rateLimit": {
+    "enabled": true,
+    "maxPerHour": 1
+  }
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文件收集 - filecollect.addtech.site</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>文件收集</h1>
+      <p>储能未来 2501 - 数学实验作业收集</p>
+    </header>
+
+    <main>
+      <!-- Upload Form -->
+      <form id="uploadForm" class="upload-form">
+        <input type="hidden" name="collection" value="experiment" />
+        <div class="form-group">
+          <label for="username">您的姓名 *</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            placeholder="请输入您的姓名"
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="file">选择文件 *</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="file" name="file" required />
+            <span class="file-hint" id="fileHint">点击选择文件，或拖拽文件到此处</span>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="submit-btn">
+          <span class="btn-text">提交上传</span>
+          <span class="btn-loading hidden">上传中...</span>
+        </button>
+      </form>
+
+      <!-- Status Messages -->
+      <div id="message" class="message hidden"></div>
+
+      <!-- File Info Preview -->
+      <div id="preview" class="preview hidden">
+        <div class="preview-header">已选文件</div>
+        <div class="preview-body">
+          <span id="previewName"></span>
+          <span id="previewSize"></span>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2026 filecollect.addtech.site - 文件收集系统</p>
+    </footer>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
